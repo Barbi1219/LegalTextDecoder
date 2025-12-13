@@ -1,0 +1,23 @@
+# Legal Text Decoder - Python Dependencies
+# ==========================================
+# PyTorch and core ML
+torch==2.3.0
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.1
+
+# Data processing
+scipy==1.14.0
+
+# Visualization (for notebooks)
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# Logging and utilities
+tqdm==4.66.4
+
+# Jupyter (for notebook development)
+jupyter==1.0.0
+ipykernel==6.29.5
+
+requests==2.31.0
