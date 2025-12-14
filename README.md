@@ -187,10 +187,10 @@ LegalTextDecoder/
 │   ├── 01-data-exploration.ipynb     # Exploratory Data Analysis
 │   └── 02-label-analysis.ipynb       # Label distribution analysis
 │
-├── log/                              # Log files (created by pipeline)
-│   └── run.log                       # Complete training and evaluation logs
-│
-├── output/                           # Output directory
+├── log/                              # Log file 
+│   └── run.log                       # Complete training and evaluation logs(created by pipeline)
+│ 
+├── output/                           # Output directory (all files in it are created by pipeline)
 │   ├── models/                       # Saved models
 │   │   ├── baseline_model.pkl        # Most Frequent Class baseline
 │   │   ├── logistic_model.pkl        # Logistic Regression
@@ -198,7 +198,8 @@ LegalTextDecoder/
 │   │   ├── gradient_boosting_model.pkl  # Gradient Boosting (best)
 │   │   ├── neural_network_model.pkl  # MLP Neural Network
 │   ├── predictions.csv               # Test predictions (all models)
-│   └── model_comparison.csv          # Model performance comparison
+│   ├── model_comparison.csv          # Model performance comparison
+│   └── inference_predictions.csv     # Inference batch predictions
 │
 ├── data/                             # Data directory (created by pipeline)
 │   ├── raw/                          # Raw JSON annotation files
