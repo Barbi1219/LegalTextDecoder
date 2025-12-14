@@ -106,7 +106,7 @@ To run the complete solution pipeline with log output:
 **Command Prompt:**
 
 ```bash
-docker run --rm -v %cd%/output:/app/output -v %cd%/log:/app/log dl-project > log/run.log 2>&1
+docker run --rm -v %cd%/output:/app/output -v %cd%/log:/app/log -v %cd%/data:/app/data dl-project > log/run.log 2>&1
 ```
 
 The `> log/run.log 2>&1` ensures that all output (stdout and stderr) is captured for submission.
