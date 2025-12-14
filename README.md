@@ -6,9 +6,9 @@
 
 ## Project Information
 
- **Selected Topic:**  Legal Text Decoder 
- **Student Name:**  Bodnár Barbara 
- **Aiming for +1 Mark:**  Yes 
+ **Selected Topic:**  Legal Text Decoder   
+ **Student Name:**  Bodnár Barbara   
+ **Aiming for +1 Mark:**  Yes  
 
 ---
 
@@ -30,12 +30,19 @@ The project follows an **incremental model development** approach, implementing 
 4. **Gradient Boosting Classifier**: Advanced ensemble model with incremental learning
 5. **Neural Network (MLP)**: PyTorch Multi-Layer Perceptron with BatchNorm and Dropout regularization
 
-**Text Complexity Features** include character/word/sentence counts, average lengths, lexical diversity, long word ratios, punctuation density, and legal terminology frequency (Hungarian legal terms).
+**All models except the baseline use the same 17 hand-crafted text complexity features as input.**  
 
-**Model Architecture (MLP)**:
+**Text Complexity Features** include character/word/sentence counts, average lengths, lexical diversity, long word ratios, punctuation density, and legal terminology frequency (Hungarian legal terms).  
+
+**Model Architectures**:
+1. **Baseline**: No learning, predicts most frequent class from training data
+2. **Logistic Regression**: Linear combination of 17 features + StandardScaler + L2 regularization
+3. **Random Forest**: 50 decision trees with max_depth=5, min_samples_split=10, min_samples_leaf=5 + StandardScaler
+4. **Gradient Boosting**: 40 trees with max_depth=5, learning_rate=0.05, min_samples_split=10, min_samples_leaf=5, subsample=0.8 + StandardScaler
+5. **Neural Network (MLP)**: 
 - Input layer: 17 features
-- Hidden layer 1: 64 neurons + ReLU + BatchNorm + Dropout(0.3)
-- Hidden layer 2: 32 neurons + ReLU + BatchNorm + Dropout(0.3)
+- Hidden layer 1: 64 neurons + ReLU + BatchNorm + Dropout(0.5)
+- Hidden layer 2: 32 neurons + ReLU + BatchNorm + Dropout(0.5)
 - Output layer: 5 classes (softmax)
 - Optimizer: Adam (lr=0.0005)
 - Loss: CrossEntropyLoss
@@ -49,23 +56,13 @@ The project follows an **incremental model development** approach, implementing 
 - QWK = 1 - (sum of weighted disagreements) / (sum of weighted chance disagreements)
 
 
-2. Regression Metrics
-- MSE 
-- RMSE
-- MAE
-- MAPE
+2. Regression Metrics: MSE, RMSE, MAE, MAPE
 
-3. Classification Metrics
-- Accuracy
-- Precision
-- Recall
-- F1-Macro
+3. Classification Metrics: Accuracy, Precision, Recall, F1-Macro
 
-4. Ordinal-Specific Metrics
-- Adjacent Accuracy
-- Confusion Matrix
+4. Ordinal-Specific Metrics: Adjacent Accuracy, Confusion Matrix
 
-**Results**: All models are evaluated on consensus-labeled test data using comprehensive metrics including Quadratic Weighted Kappa (primary ordinal metric), regression metrics (MSE, RMSE, MAE), and classification metrics (Accuracy, F1). The Neural Network model achieves the best performance with QWK = 0.45, Accuracy = 41%, Adjacent Accuracy = 82% and MAE = 0.82.
+**Results**: All models are evaluated on consensus-labeled test data using comprehensive metrics including Quadratic Weighted Kappa (primary ordinal metric), regression metrics (MSE, RMSE, MAE), and classification metrics (Accuracy, F1). The Neural Network model achieves the best performance with QWK = 0.42, Accuracy = 40%, Adjacent Accuracy = 81% and MAE = 0.84.
 
 ---
 
@@ -107,6 +104,11 @@ The build uses `python:3.10-slim` as base image and installs all dependencies fr
 To run the complete solution pipeline with log output:
 
 **Windows (PowerShell):**
+```bash
+# Step 1: Create directories
+mkdir -Force output, output/models, log
+```
+
 ```bash
 docker run --rm -v ${PWD}/output:/app/output -v ${PWD}/log:/app/log dl-project > log/run.log 2>&1
 ```
@@ -150,17 +152,16 @@ docker run --rm `
 - First row must be header: `text`
 - Text must be quoted with `"` (handles internal commas)
 - Save with UTF-8 encoding
-- Only `text` column is mandatory
 
 **Additional parameter**:
 - `--model <model_name>`: Choose specific model (default: `gradient_boosting`)
 
 Available models:
- `baseline` Most Frequent Class Baseline 
- `logistic` Logistic Regression 
- `random_forest` Random Forest Classifier
- `gradient_boosting` Gradient Boosting (default, best performance) 
- `neural_network`  MLP Neural Network 
+ - `baseline` Most Frequent Class Baseline 
+ - `logistic` Logistic Regression 
+ - `random_forest` Random Forest Classifier
+ - `gradient_boosting` Gradient Boosting (default, best performance) 
+ - `neural_network`  MLP Neural Network 
 
 ---
 
@@ -189,6 +190,16 @@ LegalTextDecoder/
 ├── log/                              # Log files (created by pipeline)
 │   └── run.log                       # Complete training and evaluation logs
 │
+├── output/                           # Output directory
+│   ├── models/                       # Saved models
+│   │   ├── baseline_model.pkl        # Most Frequent Class baseline
+│   │   ├── logistic_model.pkl        # Logistic Regression
+│   │   ├── random_forest_model.pkl   # Random Forest
+│   │   ├── gradient_boosting_model.pkl  # Gradient Boosting (best)
+│   │   ├── neural_network_model.pkl  # MLP Neural Network
+│   ├── predictions.csv               # Test predictions (all models)
+│   └── model_comparison.csv          # Model performance comparison
+│
 ├── data/                             # Data directory (created by pipeline)
 │   ├── raw/                          # Raw JSON annotation files
 │   │   ├── budapestgo_aszf.json      # Training data
@@ -198,17 +209,6 @@ LegalTextDecoder/
 │       ├── train_features.csv        # Training features only
 │       ├── test_processed.csv        # Test features and labels
 │       └── test_features.csv         # Test features only
-│
-├── models/                           # Saved models (created by training)
-│   ├── baseline_model.pkl            # Most Frequent Class baseline
-│   ├── logistic_model.pkl            # Logistic Regression
-│   ├── random_forest_model.pkl       # Random Forest
-│   ├── gradient_boosting_model.pkl   # Gradient Boosting (best model)
-│   ├── neural_network_model.pkl      # MLP Neural Network
-│   ├── nn_checkpoint.pt              # PyTorch checkpoint for fine-tuning
-│   ├── predictions.csv               # Test set predictions (all models)
-│   ├── model_comparison.csv          # Comprehensive model comparison
-│   └── inference_predictions.csv     # Inference demo results
 │
 ├── Dockerfile                        # Docker configuration
 ├── requirements.txt                  # Python dependencies
