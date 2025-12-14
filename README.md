@@ -103,10 +103,10 @@ The build uses `python:3.10-slim` as base image and installs all dependencies fr
 
 To run the complete solution pipeline with log output:
 
-**Windows (PowerShell):**
+**Command Prompt:**
 
 ```bash
-docker run --rm -v ${PWD}/output:/app/output -v ${PWD}/log:/app/log dl-project > log/run.log 2>&1
+docker run --rm -v %cd%/output:/app/output -v %cd%/log:/app/log dl-project > log/run.log 2>&1
 ```
 
 The `> log/run.log 2>&1` ensures that all output (stdout and stderr) is captured for submission.
@@ -122,10 +122,8 @@ The `> log/run.log 2>&1` ensures that all output (stdout and stderr) is captured
 To run inference on new texts using the trained models:
 
 ```bash
-# Windows PowerShell
-docker run -it --rm `
-  -v ${PWD}/output:/app/output `
-  dl-project python src/04_inference.py --interactive
+# Command Prompt
+docker run -it --rm -v %cd%/output:/app/output dl-project python src/04_inference.py --interactive
 ```
 
 **What happens:**
@@ -136,11 +134,11 @@ docker run -it --rm `
 
 
 ```bash
-# Windows PowerShell
-docker run --rm `
-  -v ${PWD}/output:/app/output `
-  -v ${PWD}/new_texts.csv:/app/input.csv `
-  -v ${PWD}/output/inference_predictions.csv:/app/output.csv `
+# Command Prompt
+docker run --rm ^
+  -v %cd%/output:/app/output ^
+  -v %cd%/new_texts.csv:/app/input.csv ^
+  -v %cd%/output/inference_predictions.csv:/app/output.csv ^
   dl-project python src/04_inference.py --file /app/input.csv --output /app/output.csv
 ```
 
