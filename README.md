@@ -119,9 +119,9 @@ The `> log/run.log 2>&1` ensures that all output (stdout and stderr) is captured
 
 ### Run Inference Only
 
-To run inference on new texts using the trained models:
-**Interactive mode:**
+To run inference on new texts using the trained models:  
 
+**Interactive mode:**
 ```bash
 # Command Prompt
 docker run -it --rm -v %cd%/output:/app/output dl-project python src/04_inference.py --interactive
