@@ -214,7 +214,7 @@ def batch_inference_from_csv(input_csv: Path, output_csv: Path = None):
     if output_csv is None:
         output_csv = OUTPUT_DIR / f"{input_csv.stem}_predictions.csv"
     
-    output_df.to_csv(output_csv, index=False)
+    output_df.to_csv(output_csv, index=False, encoding='utf-8-sig')
     logger.info(f"\nPredictions saved to: {output_csv}")
     
     # Summary statistics

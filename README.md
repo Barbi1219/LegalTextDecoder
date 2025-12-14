@@ -136,11 +136,16 @@ docker run -it --rm -v %cd%/output:/app/output dl-project python src/04_inferenc
 ```bash
 # Command Prompt
 docker run --rm ^
-  -v %cd%/output:/app/output ^
-  -v %cd%/new_texts.csv:/app/input.csv ^
-  -v %cd%/output/inference_predictions.csv:/app/output.csv ^
-  dl-project python src/04_inference.py --file /app/input.csv --output /app/output.csv
+  -v %cd%\output:/app/output ^
+  -v %cd%\new_texts.csv:/app/input.csv ^
+  dl-project python src/04_inference.py --file /app/input.csv --output /app/output/inference_predictions.csv
 ```
+
+**What happens and Requirements:**
+- Reads `new_texts.csv` from your host machine
+- Loads trained models from `output/models/`
+- Predicts rating for each text
+- Saves results to `output/inference_predictions.csv` on your host machine
 
 **Requirements:**
 - First row must be header: `text`
