@@ -120,6 +120,7 @@ The `> log/run.log 2>&1` ensures that all output (stdout and stderr) is captured
 ### Run Inference Only
 
 To run inference on new texts using the trained models:
+**Interactive mode:**
 
 ```bash
 # Command Prompt
@@ -132,7 +133,7 @@ docker run -it --rm -v %cd%/output:/app/output dl-project python src/04_inferenc
 3. Models predict comprehensibility rating (1-5)
 4. Type `quit` or `exit` to stop
 
-
+**Batch mode:**
 ```bash
 # Command Prompt
 docker run --rm ^
