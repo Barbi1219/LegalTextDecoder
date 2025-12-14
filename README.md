@@ -104,10 +104,6 @@ The build uses `python:3.10-slim` as base image and installs all dependencies fr
 To run the complete solution pipeline with log output:
 
 **Windows (PowerShell):**
-```bash
-# Step 1: Create directories
-mkdir -Force output, output/models, log
-```
 
 ```bash
 docker run --rm -v ${PWD}/output:/app/output -v ${PWD}/log:/app/log dl-project > log/run.log 2>&1
@@ -143,8 +139,8 @@ docker run -it --rm `
 # Windows PowerShell
 docker run --rm `
   -v ${PWD}/output:/app/output `
-  -v ${PWD}/my_texts.csv:/app/input.csv `
-  -v ${PWD}/predictions.csv:/app/output.csv `
+  -v ${PWD}/new_texts.csv:/app/input.csv `
+  -v ${PWD}/output/inference_predictions.csv:/app/output.csv `
   dl-project python src/04_inference.py --file /app/input.csv --output /app/output.csv
 ```
 
