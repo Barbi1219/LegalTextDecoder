@@ -142,7 +142,7 @@ docker run --rm ^
   dl-project python src/04_inference.py --file /app/input.csv --output /app/output/inference_predictions.csv
 ```
 
-**What happens and Requirements:**
+**What happens:**
 - Reads `new_texts.csv` from your host machine
 - Loads trained models from `output/models/`
 - Predicts rating for each text
