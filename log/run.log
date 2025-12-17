@@ -1,0 +1,676 @@
+========================================================================
+Legal Text Decoder - Complete Pipeline
+========================================================================
+
+[STEP 0] Downloading dataset...
+======================================================================
+DATA DOWNLOAD
+======================================================================
+
+[STEP 1] Downloading dataset...
+Downloading data from SharePoint...
+  URL: https://bmeedu-my.sharepoint.com/:u:/g/personal/gyires-toth_balint_vik_bme_hu/IQ...
+  File size: 11.6 MB
+  Downloaded: 0%
+  Downloaded: 10%
+  Downloaded: 20%
+  Downloaded: 30%
+  Downloaded: 40%
+  Downloaded: 50%
+  Downloaded: 60%
+  Downloaded: 70%
+  Downloaded: 80%
+  Downloaded: 90%
+  Downloaded: 100%
+  Download complete: dataset.zip
+
+[STEP 2] Extracting training data...
+Extracting training data (Neptun: LXXAMS)...
+  Found 1 JSON file(s) in LXXAMS/
+    Extracted: budapestgo_aszf.json
+     Training file confirmed: /app/data/raw/budapestgo_aszf.json
+  Training data extracted successfully
+
+[STEP 3] Extracting consensus data...
+Extracting consensus test data...
+  Found 30 JSON file(s) in legaltextdecoder/consensus/
+    Extracted 10/30 files...
+    Extracted 20/30 files...
+    Extracted 30/30 files...
+  Consensus data extracted successfully
+
+[STEP 4] Verifying data...
+  Training files: 1
+  Consensus files: 30
+
+======================================================================
+DATA DOWNLOAD COMPLETED
+======================================================================
+Cleaned up: data/temp/dataset.zip
+Cleaned up: data/temp
+
+[STEP 1] Data preprocessing...
+======================================================================
+DATA PREPROCESSING
+======================================================================
+[STEP 1] Loading training data...
+  Loaded 133 samples from budapestgo_aszf.json
+[STEP 2] Loading consensus (test) data...
+  Minimum annotations per file: 40
+Found 30 JSON files in consensus directory
+
+Consensus loading summary:
+  Skipped (empty or invalid):     1 files
+  Skipped (<40 annotations): 8 files
+  Valid:     21 files
+Total consensus annotations loaded: 2407
+  Loaded 2407 annotations from consensus files
+[STEP 3] Preparing train/test split...
+  Using budapestgo_aszf.json for training, consensus for testing
+[STEP 4] Cleaning data...
+  Train samples after cleaning: 133
+  Test samples after cleaning: 2407
+[STEP 5] Extracting text features...
+  Extracted 17 features
+[STEP 6] Saving processed data...
+  Saved: /app/data/processed/train_processed.csv
+  Saved: /app/data/processed/test_processed.csv
+======================================================================
+DATA PREPROCESSING COMPLETED
+  Train samples: 133
+  Test samples: 2407
+  Features: 17
+======================================================================
+
+[STEP 2] Model training...
+======================================================================
+MODEL TRAINING - INCREMENTAL DEVELOPMENT
+======================================================================
+
+[LOADING DATA]
+Training samples: 133
+Test samples: 2407
+
+Using 17 features: ['char_count', 'word_count', 'sentence_count', 'avg_word_length', 'avg_sentence_length', 'long_word_ratio', 'complex_word_ratio', 'lexical_diversity', 'comma_per_sentence', 'parentheses_ratio', 'sentence_complexity', 'punctuation_ratio', 'number_count', 'digit_ratio', 'upper_word_ratio', 'legal_term_count', 'legal_term_ratio']
+----------------------------------------------------------------------
+
+[MODEL 1] BASELINE: Most Frequent Class
+----------------------------------------------------------------------
+Most frequent class in training data: 5
+Class distribution: {4: 37, 2: 6, 1: 4, 3: 28, 5: 58}
+Baseline model trained
+Baseline training accuracy: 0.4361
+  (Always predicts class 5 - represents 43.6% of training data)
+----------------------------------------------------------------------
+
+[MODEL 2] LOGISTIC REGRESSION with Text Complexity Features
+----------------------------------------------------------------------
+Logistic Regression model trained
+Training accuracy: 0.6842
+Cross-validation accuracy: 0.5109 (+/- 0.1485)
+----------------------------------------------------------------------
+
+[MODEL 3] RANDOM FOREST Classifier
+----------------------------------------------------------------------
+Configuration:
+  n_estimators: 50
+  max_depth: 5
+  min_samples_split: 10
+  min_samples_leaf: 5
+Random Forest model trained
+
+Training accuracy: 0.8045
+Cross-validation accuracy: 0.4590 (+/- 0.1418)
+
+Top 5 important features:
+  legal_term_count: 0.1551
+  avg_sentence_length: 0.1041
+  sentence_complexity: 0.0886
+  word_count: 0.0884
+  char_count: 0.0865
+----------------------------------------------------------------------
+
+[MODEL 4] GRADIENT BOOSTING Classifier
+----------------------------------------------------------------------
+Configuration:
+  n_estimators: 40
+  max_depth: 3
+  min_samples_split: 10
+  min_samples_leaf: 5
+Gradient Boosting model trained
+
+Training accuracy: 0.9624
+Cross-validation accuracy: 0.5040 (+/- 0.1198)
+
+Top 5 important features:
+  legal_term_count: 0.1314
+  char_count: 0.1297
+  legal_term_ratio: 0.0878
+  lexical_diversity: 0.0831
+  sentence_complexity: 0.0643
+----------------------------------------------------------------------
+
+[MODEL 5] NEURAL NETWORK (MLP)
+----------------------------------------------------------------------
+Configuration:
+  Epochs: 80
+  Batch size: 32
+  Learning rate: 0.0005
+  Hidden dimension: 64
+  Dropout: 0.5
+  Device: CPU
+
+Training neural network...
+Epoch [1/80], Train Loss: 1.7040, Val Loss: 1.5904
+Epoch [10/80], Train Loss: 1.5790, Val Loss: 1.6084
+Epoch [20/80], Train Loss: 1.3406, Val Loss: 1.5783
+Epoch [30/80], Train Loss: 1.3027, Val Loss: 1.5734
+Epoch [40/80], Train Loss: 1.2258, Val Loss: 1.5303
+Epoch [50/80], Train Loss: 1.1356, Val Loss: 1.5075
+Epoch [60/80], Train Loss: 1.0504, Val Loss: 1.4878
+Epoch [70/80], Train Loss: 0.9966, Val Loss: 1.4790
+Epoch [80/80], Train Loss: 0.9865, Val Loss: 1.4883
+Neural Network model trained
+
+Model architecture:
+MLPClassifier(
+  (network): Sequential(
+    (0): Linear(in_features=17, out_features=64, bias=True)
+    (1): ReLU()
+    (2): BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (3): Dropout(p=0.5, inplace=False)
+    (4): Linear(in_features=64, out_features=32, bias=True)
+    (5): ReLU()
+    (6): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (7): Dropout(p=0.5, inplace=False)
+    (8): Linear(in_features=32, out_features=5, bias=True)
+  )
+)
+
+Total parameters: 3589
+Trainable parameters: 3589
+----------------------------------------------------------------------
+
+[SAVING MODELS]
+----------------------------------------------------------------------
+Model saved to /app/output/models/baseline_model.pkl
+Model saved to /app/output/models/logistic_model.pkl
+Model saved to /app/output/models/random_forest_model.pkl
+Model saved to /app/output/models/gradient_boosting_model.pkl
+Model saved to /app/output/models/neural_network_model.pkl
+ Predictions saved to /app/output/predictions.csv
+======================================================================
+MODEL TRAINING COMPLETED
+
+[STEP 3] Model evaluation...
+======================================================================
+LEGAL TEXT DECODER - MODEL EVALUATION
+======================================================================
+
+Loaded predictions for 2407 test samples
+Models to evaluate: ['baseline', 'logistic', 'random_forest', 'gradient_boosting', 'neural_network']
+======================================================================
+
+EVALUATION: BASELINE
+======================================================================
+
+Metrics:
+--------------------------------------------------
+  MSE: 3.1413
+  RMSE: 1.7724
+  MAE: 1.3432
+  MAPE: 33.5791
+  Macro_MAE: 2.0000
+  Accuracy: 0.2833
+  F1_Macro: 0.0883
+  F1_Weighted: 0.1251
+  QWK: 0.0000
+  Adjacent_Accuracy: 0.5978
+
+Confusion Matrix - baseline:
+--------------------------------------------------
+True\Pred |  1  |  2  |  3  |  4  |  5  | Total
+--------------------------------------------------
+    1     |   0 |   0 |   0 |   0 | 116 |   116
+    2     |   0 |   0 |   0 |   0 | 308 |   308
+    3     |   0 |   0 |   0 |   0 | 544 |   544
+    4     |   0 |   0 |   0 |   0 | 757 |   757
+    5     |   0 |   0 |   0 |   0 | 682 |   682
+--------------------------------------------------
+  Total   |   0 |   0 |   0 |   0 | 2407 |  2407
+
+Classification Report - baseline:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+    Rating 1       0.00      0.00      0.00       116
+    Rating 2       0.00      0.00      0.00       308
+    Rating 3       0.00      0.00      0.00       544
+    Rating 4       0.00      0.00      0.00       757
+    Rating 5       0.28      1.00      0.44       682
+
+    accuracy                           0.28      2407
+   macro avg       0.06      0.20      0.09      2407
+weighted avg       0.08      0.28      0.13      2407
+
+
+Error Analysis - baseline:
+--------------------------------------------------
+Signed Error Distribution:
+  (Negative = Underestimate, Positive = Overestimate)
+
+Error distribution:
+  Error +0:  682 ( 28.3%) ██████████████
+  Error +1:  757 ( 31.4%) ███████████████
+  Error +2:  544 ( 22.6%) ███████████
+  Error +3:  308 ( 12.8%) ██████
+  Error +4:  116 (  4.8%) ██
+
+Absolute error distribution:
+  |Error| = 0:  682 ( 28.3%) ██████████████
+  |Error| = 1:  757 ( 31.4%) ███████████████
+  |Error| = 2:  544 ( 22.6%) ███████████
+  |Error| = 3:  308 ( 12.8%) ██████
+  |Error| = 4:  116 (  4.8%) ██
+======================================================================
+
+EVALUATION: LOGISTIC
+======================================================================
+
+Metrics:
+--------------------------------------------------
+  MSE: 1.7374
+  RMSE: 1.3181
+  MAE: 0.9414
+  MAPE: 23.5355
+  Macro_MAE: 1.1626
+  Accuracy: 0.3685
+  F1_Macro: 0.2984
+  F1_Weighted: 0.3305
+  QWK: 0.3800
+  Adjacent_Accuracy: 0.7669
+
+Confusion Matrix - logistic:
+--------------------------------------------------
+True\Pred |  1  |  2  |  3  |  4  |  5  | Total
+--------------------------------------------------
+    1     |  33 |  21 |  18 |  24 |  20 |   116
+    2     |  36 |  21 | 114 |  67 |  70 |   308
+    3     |  28 |  23 | 185 | 122 | 186 |   544
+    4     |  17 |  18 | 219 | 139 | 364 |   757
+    5     |   7 |  20 |  86 |  60 | 509 |   682
+--------------------------------------------------
+  Total   | 121 | 103 | 622 | 412 | 1149 |  2407
+
+Classification Report - logistic:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+    Rating 1       0.27      0.28      0.28       116
+    Rating 2       0.20      0.07      0.10       308
+    Rating 3       0.30      0.34      0.32       544
+    Rating 4       0.34      0.18      0.24       757
+    Rating 5       0.44      0.75      0.56       682
+
+    accuracy                           0.37      2407
+   macro avg       0.31      0.32      0.30      2407
+weighted avg       0.34      0.37      0.33      2407
+
+
+Error Analysis - logistic:
+--------------------------------------------------
+Signed Error Distribution:
+  (Negative = Underestimate, Positive = Overestimate)
+
+Error distribution:
+  Error -4:    7 (  0.3%) 
+  Error -3:   37 (  1.5%) 
+  Error -2:  132 (  5.5%) ██
+  Error -1:  338 ( 14.0%) ███████
+  Error +0:  887 ( 36.9%) ██████████████████
+  Error +1:  621 ( 25.8%) ████████████
+  Error +2:  271 ( 11.3%) █████
+  Error +3:   94 (  3.9%) █
+  Error +4:   20 (  0.8%) 
+
+Absolute error distribution:
+  |Error| = 0:  887 ( 36.9%) ██████████████████
+  |Error| = 1:  959 ( 39.8%) ███████████████████
+  |Error| = 2:  403 ( 16.7%) ████████
+  |Error| = 3:  131 (  5.4%) ██
+  |Error| = 4:   27 (  1.1%) 
+======================================================================
+
+EVALUATION: RANDOM_FOREST
+======================================================================
+
+Metrics:
+--------------------------------------------------
+  MSE: 1.4828
+  RMSE: 1.2177
+  MAE: 0.8554
+  MAPE: 21.3855
+  Macro_MAE: 1.2562
+  Accuracy: 0.3963
+  F1_Macro: 0.2551
+  F1_Weighted: 0.3549
+  QWK: 0.3203
+  Adjacent_Accuracy: 0.8002
+
+Confusion Matrix - random_forest:
+--------------------------------------------------
+True\Pred |  1  |  2  |  3  |  4  |  5  | Total
+--------------------------------------------------
+    1     |   0 |   0 |  62 |  30 |  24 |   116
+    2     |   0 |   0 | 140 | 121 |  47 |   308
+    3     |   0 |   0 | 193 | 223 | 128 |   544
+    4     |   0 |   0 | 187 | 307 | 263 |   757
+    5     |   0 |   0 |  69 | 159 | 454 |   682
+--------------------------------------------------
+  Total   |   0 |   0 | 651 | 840 | 916 |  2407
+
+Classification Report - random_forest:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+    Rating 1       0.00      0.00      0.00       116
+    Rating 2       0.00      0.00      0.00       308
+    Rating 3       0.30      0.35      0.32       544
+    Rating 4       0.37      0.41      0.38       757
+    Rating 5       0.50      0.67      0.57       682
+
+    accuracy                           0.40      2407
+   macro avg       0.23      0.29      0.26      2407
+weighted avg       0.32      0.40      0.35      2407
+
+
+Error Analysis - random_forest:
+--------------------------------------------------
+Signed Error Distribution:
+  (Negative = Underestimate, Positive = Overestimate)
+
+Error distribution:
+  Error -2:   69 (  2.9%) █
+  Error -1:  346 ( 14.4%) ███████
+  Error +0:  954 ( 39.6%) ███████████████████
+  Error +1:  626 ( 26.0%) █████████████
+  Error +2:  311 ( 12.9%) ██████
+  Error +3:   77 (  3.2%) █
+  Error +4:   24 (  1.0%) 
+
+Absolute error distribution:
+  |Error| = 0:  954 ( 39.6%) ███████████████████
+  |Error| = 1:  972 ( 40.4%) ████████████████████
+  |Error| = 2:  380 ( 15.8%) ███████
+  |Error| = 3:   77 (  3.2%) █
+  |Error| = 4:   24 (  1.0%) 
+======================================================================
+
+EVALUATION: GRADIENT_BOOSTING
+======================================================================
+
+Metrics:
+--------------------------------------------------
+  MSE: 1.6361
+  RMSE: 1.2791
+  MAE: 0.9132
+  MAPE: 22.8292
+  Macro_MAE: 1.2097
+  Accuracy: 0.3756
+  F1_Macro: 0.2939
+  F1_Weighted: 0.3450
+  QWK: 0.3327
+  Adjacent_Accuracy: 0.7744
+
+Confusion Matrix - gradient_boosting:
+--------------------------------------------------
+True\Pred |  1  |  2  |  3  |  4  |  5  | Total
+--------------------------------------------------
+    1     |  25 |   3 |  41 |  25 |  22 |   116
+    2     |  20 |   2 | 121 | 108 |  57 |   308
+    3     |  15 |   6 | 184 | 199 | 140 |   544
+    4     |  11 |  11 | 226 | 237 | 272 |   757
+    5     |   1 |  13 |  99 | 113 | 456 |   682
+--------------------------------------------------
+  Total   |  72 |  35 | 671 | 682 | 947 |  2407
+
+Classification Report - gradient_boosting:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+    Rating 1       0.35      0.22      0.27       116
+    Rating 2       0.06      0.01      0.01       308
+    Rating 3       0.27      0.34      0.30       544
+    Rating 4       0.35      0.31      0.33       757
+    Rating 5       0.48      0.67      0.56       682
+
+    accuracy                           0.38      2407
+   macro avg       0.30      0.31      0.29      2407
+weighted avg       0.33      0.38      0.34      2407
+
+
+Error Analysis - gradient_boosting:
+--------------------------------------------------
+Signed Error Distribution:
+  (Negative = Underestimate, Positive = Overestimate)
+
+Error distribution:
+  Error -4:    1 (  0.0%) 
+  Error -3:   24 (  1.0%) 
+  Error -2:  125 (  5.2%) ██
+  Error -1:  365 ( 15.2%) ███████
+  Error +0:  904 ( 37.6%) ██████████████████
+  Error +1:  595 ( 24.7%) ████████████
+  Error +2:  289 ( 12.0%) ██████
+  Error +3:   82 (  3.4%) █
+  Error +4:   22 (  0.9%) 
+
+Absolute error distribution:
+  |Error| = 0:  904 ( 37.6%) ██████████████████
+  |Error| = 1:  960 ( 39.9%) ███████████████████
+  |Error| = 2:  414 ( 17.2%) ████████
+  |Error| = 3:  106 (  4.4%) ██
+  |Error| = 4:   23 (  1.0%) 
+======================================================================
+
+EVALUATION: NEURAL_NETWORK
+======================================================================
+
+Metrics:
+--------------------------------------------------
+  MSE: 1.4279
+  RMSE: 1.1950
+  MAE: 0.8371
+  MAPE: 20.9285
+  Macro_MAE: 1.0452
+  Accuracy: 0.3980
+  F1_Macro: 0.3231
+  F1_Weighted: 0.3757
+  QWK: 0.4214
+  Adjacent_Accuracy: 0.8143
+
+Confusion Matrix - neural_network:
+--------------------------------------------------
+True\Pred |  1  |  2  |  3  |  4  |  5  | Total
+--------------------------------------------------
+    1     |  42 |   1 |  45 |  15 |  13 |   116
+    2     |  32 |   1 | 149 | 100 |  26 |   308
+    3     |  38 |   0 | 195 | 221 |  90 |   544
+    4     |  20 |   1 | 223 | 328 | 185 |   757
+    5     |  13 |   6 |  80 | 191 | 392 |   682
+--------------------------------------------------
+  Total   | 145 |   9 | 692 | 855 | 706 |  2407
+
+Classification Report - neural_network:
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+    Rating 1       0.29      0.36      0.32       116
+    Rating 2       0.11      0.00      0.01       308
+    Rating 3       0.28      0.36      0.32       544
+    Rating 4       0.38      0.43      0.41       757
+    Rating 5       0.56      0.57      0.56       682
+
+    accuracy                           0.40      2407
+   macro avg       0.32      0.35      0.32      2407
+weighted avg       0.37      0.40      0.38      2407
+
+
+Error Analysis - neural_network:
+--------------------------------------------------
+Signed Error Distribution:
+  (Negative = Underestimate, Positive = Overestimate)
+
+Error distribution:
+  Error -4:   13 (  0.5%) 
+  Error -3:   26 (  1.1%) 
+  Error -2:  119 (  4.9%) ██
+  Error -1:  446 ( 18.5%) █████████
+  Error +0:  958 ( 39.8%) ███████████████████
+  Error +1:  556 ( 23.1%) ███████████
+  Error +2:  235 (  9.8%) ████
+  Error +3:   41 (  1.7%) 
+  Error +4:   13 (  0.5%) 
+
+Absolute error distribution:
+  |Error| = 0:  958 ( 39.8%) ███████████████████
+  |Error| = 1: 1002 ( 41.6%) ████████████████████
+  |Error| = 2:  354 ( 14.7%) ███████
+  |Error| = 3:   67 (  2.8%) █
+  |Error| = 4:   26 (  1.1%) 
+======================================================================
+MODEL COMPARISON TABLE
+======================================================================
+
+            Model      MSE     RMSE      MAE      MAPE  Macro_MAE  Accuracy  F1_Macro  F1_Weighted      QWK  Adjacent_Accuracy
+         baseline 3.141255 1.772359 1.343166 33.579144   2.000000  0.283340  0.088313     0.125114 0.000000           0.597840
+         logistic 1.737432 1.318117 0.941421 23.535521   1.162642  0.368509  0.298357     0.330537 0.380001           0.766930
+    random_forest 1.482759 1.217686 0.855422 21.385542   1.256183  0.396344  0.255139     0.354916 0.320304           0.800166
+gradient_boosting 1.636061 1.279086 0.913170 22.829248   1.209697  0.375571  0.293950     0.344986 0.332671           0.774408
+   neural_network 1.427919 1.194955 0.837142 20.928542   1.045192  0.398006  0.323094     0.375658 0.421351           0.814292
+
+
+Best Model per Metric:
+--------------------------------------------------
+  MSE: neural_network (1.4279)
+  RMSE: neural_network (1.1950)
+  MAE: neural_network (0.8371)
+  MAPE: neural_network (20.9285)
+  Macro_MAE: neural_network (1.0452)
+  Accuracy: neural_network (0.3980)
+  F1_Macro: neural_network (0.3231)
+  F1_Weighted: neural_network (0.3757)
+  QWK: neural_network (0.4214)
+  Adjacent_Accuracy: neural_network (0.8143)
+
+ Comparison saved to /app/output/model_comparison.csv
+======================================================================
+
+EVALUATION CRITERIA DEFINITION
+======================================================================
+
+The following metrics are used to evaluate model performance:
+
+1. REGRESSION METRICS (treat ratings as continuous):
+   - MSE: Mean Squared Error - penalizes large errors more heavily
+   - RMSE: Root Mean Squared Error - same scale as ratings
+   - MAE: Mean Absolute Error - average error magnitude
+   - MAPE: Mean Absolute Percentage Error (relative to scale)
+   - Macro MAE: Class-balanced MAE (equal weight per class)
+
+2. CLASSIFICATION METRICS (treat ratings as discrete classes):
+   - Accuracy: Exact match rate
+   - F1 Macro: Harmonic mean of precision/recall (class-balanced)
+   - F1 Weighted: F1 weighted by class frequency
+
+3. ORDINAL-SPECIFIC METRICS (account for rating order):
+   - QWK: Quadratic Weighted Kappa - penalizes distant errors more
+         Range [-1, 1], higher is better, 1 = perfect agreement
+   - Adjacent Accuracy: Allows off-by-one predictions as correct
+         Useful since 3 vs 4 is less severe than 1 vs 5
+
+PRIMARY EVALUATION CRITERION: 
+   QWK (Quadratic Weighted Kappa) is recommended as the primary metric
+   because it properly handles the ordinal nature of the rating scale
+   and penalizes larger prediction errors more heavily.
+
+SECONDARY METRICS:
+   - MAE for interpretability (average error in rating units)
+   - Accuracy for exact match performance
+   - Adjacent Accuracy for practical usefulness
+
+======================================================================
+EVALUATION SUMMARY
+======================================================================
+
+Best model by QWK: neural_network (0.4214)
+Best model by Accuracy: neural_network (0.3980)
+Best model by Adjacent Accuracy: neural_network (0.8143)
+Best model by MAE: neural_network (0.8371)
+
+Improvement over baseline:
+  logistic:
+    QWK: +0.3800
+    MAE: +0.4017
+  random_forest:
+    QWK: +0.3203
+    MAE: +0.4877
+  gradient_boosting:
+    QWK: +0.3327
+    MAE: +0.4300
+  neural_network:
+    QWK: +0.4214
+    MAE: +0.5060
+======================================================================
+EVALUATION COMPLETED
+======================================================================
+
+[STEP 4] Inference demonstration...
+======================================================================
+INFERENCE DEMO
+(Using test data samples to demonstrate inference capability)
+======================================================================
+Model loaded from /app/output/models/gradient_boosting_model.pkl
+Loaded model: gradient_boosting
+Running inference on 5 sample texts:
+
+----------------------------------------------------------------------
+Sample 1:
+Text: e-azonosító szám: A Bank által kibocsátott virtuális kártyaszám, amely e-bank azonosító kártya kiboc...
+Predicted: 5 - 5-Könnyen érthető
+True:      2 - 2-Nehezen érthető
+✗ Error: +3
+----------------------------------------------------------------------
+Sample 2:
+Text: 2.2 Az Ügyfél köteles rendelkezni az e-bank szolgáltatás igénybevételéhez szükséges, a Bank által me...
+Predicted: 3 - 3-Többé/kevésbé megértem
+True:      5 - 5-Könnyen érthető
+✗ Error: -2
+----------------------------------------------------------------------
+Sample 3:
+Text: 2.14 Tekintettel arra, hogy az Ügyfél K&H Trambulin 14+ számla esetén korlátozottan cselekvőképes ki...
+Predicted: 4 - 4-Érthető
+True:      4 - 4-Érthető
+✓ Correct prediction!
+----------------------------------------------------------------------
+Sample 4:
+Text: 2.3 Az Ügyfél/Felhasználó az e-bank szolgáltatás keretében banki szolgáltatásokat vehet igénybe. A s...
+Predicted: 5 - 5-Könnyen érthető
+True:      3 - 3-Többé/kevésbé megértem
+✗ Error: +2
+----------------------------------------------------------------------
+Sample 5:
+Text: 4.2 Az e-bank azonosító kártyát, illetve az e-azonosító számot kizárólag az Ügyfél/Felhasználó jogos...
+Predicted: 5 - 5-Könnyen érthető
+True:      4 - 4-Érthető
+✗ Error: +1
+======================================================================
+Demo accuracy: 1/5 = 20.0%
+======================================================================
+======================================================================
+INFERENCE COMPLETED
+======================================================================
+
+========================================================================
+Pipeline completed successfully!
+========================================================================
